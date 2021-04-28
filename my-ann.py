@@ -10,7 +10,7 @@ def fit(X, y, alpha, reg_factor, epochs, hidden, activations, theta):
             X_i = X_i.reshape(-1, 1)
             y_i = y[i, :].T
             forward(X_i, hidden, activations, theta)
-            backprop(X_i, y_i, hidden, activations, theta, alpha, reg_factor)
+            backprop(y_i, hidden, activations, theta, alpha, reg_factor)
 
 
 def z(input, Theta):
@@ -22,26 +22,30 @@ def activation(z):
 
 
 def initialize_weights(X, num_classes, hidden):
+    print(X)
+    print(num_classes)
+    print(hidden)
     weights = []
-    out_neurons = num_classes
+    out_neurons = num_classes # len(y)
     n = X.shape[0]
-
+    
     hidden_layers = len(hidden)
-
-    for i in range(0, hidden_layers):
-        m = hidden[i]
-        cols = n + 1
-        weights_layer = np.random.rand(m, cols)
+    
+    s_j = n
+    
+    for j in range(0,hidden_layers):
+        s_jplus1 = hidden[j]
+        cols = s_j + 1
+        weights_layer = np.random.rand(s_jplus1, cols)
         weights.append(weights_layer)
-        n = m
-
-    weights.append(np.random.rand(out_neurons, n + 1))
+        s_j = s_jplus1
+    
+    weights.append(np.random.rand(out_neurons, s_j + 1))
     return weights
-
 
 def initialize_activations(X, out_neurons, hidden):
     activations = []
-    a1 = X
+    a1 = np.array([X[:, 0]]).T
     biases = np.ones(a1.shape[1])
     a1 = np.vstack((biases, a1))
     activations.append(a1)
@@ -59,9 +63,10 @@ def initialize_activations(X, out_neurons, hidden):
 def forward(X, hidden, activations, theta):
     m = X.shape[1]
     for i in range(m):
+        #print(activations)
         for j in range(0, len(hidden)):
             ai = activations[i]
-            znext = z(ai, theta[1])
+            znext = z(ai, theta[i])
             anext = activation(znext)
             activations[i+1][1:] = anext
 
@@ -71,10 +76,11 @@ def forward(X, hidden, activations, theta):
         activations[i+2] = anext
 
 
-def backprop(X, y, hidden, activations, theta, alpha, reg):
+def backprop(y, hidden, activations, theta, alpha, reg):
     m = len(y)
     delta = []
-
+    #print(theta)
+    #print(activations)
     ypred = activations[-1]
     deltai = ypred - y
 
@@ -168,13 +174,14 @@ y = y.reshape(-1, 1)  # to get an mx1 array and not (m,)
 unique_classes = len(np.unique(y))
 y = get_one_hot(y, unique_classes)
 
+
 hidden = [2, 5]
 theta = initialize_weights(X, unique_classes, hidden)
 activations = initialize_activations(X, unique_classes, hidden)
 
 m = X.shape[1]
 epochs = 2000
-
+print(theta)
 fit(X, y, 0.5, 0, epochs, hidden, activations, theta)
 
 to_pred = X[:, 0]
@@ -183,9 +190,12 @@ to_pred = to_pred.reshape(-1, 1)
 y_pred = predict(to_pred, theta)
 print('{} pred as {}, should be {}'.format(to_pred.T, y_pred.T, y_i.T))
 
-
-# (X, y, hidden, theta) = get_config_for_example()
-# activations = initialize_activations(X, out_neurons=2, hidden=hidden)
-# fit(X, y, 0.5, 0, 10000, hidden, activations, theta)
-# y_pred = predict(X, theta)
-# print('{} pred as {}, should be {}'.format(X.T, y_pred.T, y.T))
+"""
+(X, y, hidden, theta) = get_config_for_example()
+activations = initialize_activations(X, out_neurons=2, hidden=hidden)
+for i in range(10000):
+    forward(X, hidden, activations, theta)
+    backprop(y, hidden, activations, theta, alpha=0.5, reg=0)
+y_pred = predict(X, theta)
+print('{} pred as {}, should be {}'.format(X.T, y_pred.T, y.T))
+"""

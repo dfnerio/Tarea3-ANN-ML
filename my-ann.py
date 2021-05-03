@@ -2,44 +2,37 @@
 import numpy as np
 import pandas as pd
 
-
 def fit(X, y, alpha, reg_factor, epochs, hidden, activations, theta):
-    for i in range(epochs):
-        for i in range(m):
+    for x in range(epochs):
+        for i in range(len(y)):
             X_i = X[:, i]
             X_i = X_i.reshape(-1, 1)
             y_i = y[i, :].T
             forward(X_i, hidden, activations, theta)
             backprop(y_i, hidden, activations, theta, alpha, reg_factor)
 
-
 def z(input, Theta):
     return np.dot(Theta, input)
-
 
 def activation(z):
     return 1 / (1 + np.exp(-z))
 
-
 def initialize_weights(X, num_classes, hidden):
-    print(X)
-    print(num_classes)
-    print(hidden)
     weights = []
-    out_neurons = num_classes # len(y)
+    out_neurons = num_classes  # len(y)
     n = X.shape[0]
-    
+
     hidden_layers = len(hidden)
-    
+
     s_j = n
-    
-    for j in range(0,hidden_layers):
+
+    for j in range(0, hidden_layers):
         s_jplus1 = hidden[j]
         cols = s_j + 1
         weights_layer = np.random.rand(s_jplus1, cols)
         weights.append(weights_layer)
         s_j = s_jplus1
-    
+# 
     weights.append(np.random.rand(out_neurons, s_j + 1))
     return weights
 
@@ -63,7 +56,6 @@ def initialize_activations(X, out_neurons, hidden):
 def forward(X, hidden, activations, theta):
     m = X.shape[1]
     for i in range(m):
-        #print(activations)
         for j in range(0, len(hidden)):
             ai = activations[i]
             znext = z(ai, theta[i])
@@ -79,8 +71,6 @@ def forward(X, hidden, activations, theta):
 def backprop(y, hidden, activations, theta, alpha, reg):
     m = len(y)
     delta = []
-    #print(theta)
-    #print(activations)
     ypred = activations[-1]
     deltai = ypred - y
 
@@ -98,7 +88,7 @@ def backprop(y, hidden, activations, theta, alpha, reg):
     delta.reverse()
 
     n_clases = theta[-1].shape[0]
-    Delta = initialize_weights(X, n_clases, hidden)
+    Delta = initialize_weights(y, n_clases, hidden)
     start = len(delta) - 1
 
     for i in range(start, -1, -1):
@@ -189,6 +179,7 @@ y_i = y[0, :].T
 to_pred = to_pred.reshape(-1, 1)
 y_pred = predict(to_pred, theta)
 print('{} pred as {}, should be {}'.format(to_pred.T, y_pred.T, y_i.T))
+
 
 """
 (X, y, hidden, theta) = get_config_for_example()
